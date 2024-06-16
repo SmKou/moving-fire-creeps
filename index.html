@@ -104,8 +104,11 @@
             ctx.fillText('You', player.x, player.y)
 
             ctx.fillStyle = 'springgreen'
-            for (const creep of creeps)
+            for (const creep of creeps) {
                 ctx.fillRect(creep.x, creep.y, 10, 10)
+                creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
+                creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
+            }
 
             btn.x += btn.x_speed * btn.dx
             btn.y += btn.y_speed * btn.dy
