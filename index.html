@@ -52,6 +52,9 @@
         const lose_disp = document.getElementById('lose-disp')
         const fire_btn = document.getElementById('fire-btn')
 
+        let win = false
+        let lose = false
+
         const width = document.querySelector('body').clientWidth
         const height = document.querySelector('body').clientHeight
 
@@ -105,7 +108,11 @@
 
             ctx.fillStyle = 'springgreen'
             for (const creep of creeps) {
-                if (creep.x <= player.x + player.size && creep.x >= player.x && creep.y <= player.y + player.size && creep.y >= player.y)
+                if (creep.x <= player.x + player.size && creep.x >= player.x && creep.y <= player.y + player.size && creep.y >= player.y) {
+                    lose = true
+                    lose_disp.style.display = 'block'
+                }
+
                 ctx.fillRect(creep.x, creep.y, 10, 10)
                 creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
                 creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
@@ -145,7 +152,8 @@
             fire_btn.style.left = btn.x + 'px'
             fire_btn.style.top = btn.y + 'px'
 
-            requestAnimationFrame(draw)
+            if (!win && !lose)
+                requestAnimationFrame(draw)
         }
 
         draw()
