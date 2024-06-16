@@ -105,6 +105,7 @@
 
             ctx.fillStyle = 'springgreen'
             for (const creep of creeps) {
+                if (creep.x <= player.x + player.size && creep.x >= player.x && creep.y <= player.y + player.size && creep.y >= player.y)
                 ctx.fillRect(creep.x, creep.y, 10, 10)
                 creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
                 creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
