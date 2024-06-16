@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moving Button</title>
+    <style>
+        * { overflow: hidden }
+
+        body {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        span#score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 36px;
+        }
+
+        span#lose-disp {
+            position: absolute;
+            left: 25%;
+            top: 25%;
+            font-size: 120px;
+            font-family: sans-serif;
+            display: none;
+        }
+
+        #fire-btn {
+            position: absolute;
+            left: 20px;
+            top: 0;
+            width: 78px;
+            height: 36px;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <span id="score">0</span>
+    <span id="lose-disp" class="inactive">You lost!</span>
+    <button id="fire-btn">Fire</button>
+    <script>
+        const score_disp = document.getElementById('score')
+        const lose_disp = document.getElementById('lose-disp')
+        const fire_btn = document.getElementById('fire-btn')
+
+        const width = document.querySelector('body').clientWidth
+        const height = document.querySelector('body').clientHeight
+
+        const btn = {
+            x: Math.random() * width,
+            dx: 1,
+            y: Math.random() * height,
+            dy: 1,
+            x_speed: 4,
+            y_speed: 4
+        }
+
+        fire_btn.style.left = btn.x + 'px'
+        fire_btn.style.top = btn.y + 'px'
+
+        const cvs = document.querySelector('canvas')
+        cvs.width = cvs.clientWidth
+        cvs.height = cvs.clientHeight
+        let ctx = cvs.getContext('2d')
+
+        const x_offset = width - fire_btn.clientWidth
+        const y_offset = height - fire_btn.clientHeight
+
+        const player = { x: 30, y: cvs.height / 2 - 5, size: 10 }
+        const ammo = []
+        const creeps = []
+
+        const timein = {
+            lim: 20,
+            max_count: 60,
+            count: 60
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'white'
+            ctx.fillRect(0, 0, width, height)
+
+            timein.count--
+            if (timein.count <= 0) {
+                timein.max_count--
+                timein.count = timein.max_count
+
+                if (creeps.length < timein.lim) {
+                    creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
+                }
+            }
+
+            ctx.fillStyle = 'black'
+            ctx.font = '24px sans-serif'
+            ctx.fillText('You', player.x, player.y)
+
+            ctx.fillStyle = 'springgreen'
+            for (const creep of creeps)
+                ctx.fillRect(creep.x, creep.y, 10, 10)
+
+            btn.x += btn.x_speed * btn.dx
+            btn.y += btn.y_speed * btn.dy
+
+            if (btn.x >= x_offset) btn.x = x_offset
+            if (btn.x <= 0) btn.x = 0
+
+            if (btn.y >= y_offset) btn.y = y_offset
+            if (btn.y <= 0) btn.y = 0
+
+            if (btn.x >= x_offset || btn.x <= 0) {
+                btn.dx *= -1
+                btn.x_speed = Math.random() * 4 + 4
+            }
+
+            if (btn.y >= y_offset || btn.y <= 0) {
+                btn.dy *= -1
+                btn.y_speed = Math.random() * 4 + 4
+            }
+
+            if (btn.x < width / 2 + 100 && btn.x > width / 2 - 100 && btn.y < height / 2 + 100 && btn.y > height / 2 - 100) {
+                const r = Math.random()
+                if (r < .1) {
+                    btn.dx *= -1
+                    btn.dy *= -1
+                }
+                if (r > .4 && r < .5)
+                    btn.dx *= -1
+                if (r > .9)
+                    btn.dy *= -1
+            }
+
+            fire_btn.style.left = btn.x + 'px'
+            fire_btn.style.top = btn.y + 'px'
+
+            requestAnimationFrame(draw)
+        }
+
+        draw()
+
+//         const run = () => {
+//             const creeps = []
+//             const ammo = []
+//             const timein = Date.now()
+//
+//
+//
+//             const draw_player = () => {
+//                 ctx.strokeStyle = 'black'
+//                 ctx.strokeRect(player.x, player.y, player.size, player.size)
+//             }
+//
+//             const shoot = () => ammo.push({ x: player.x, y: player.y, size: 5 })
+//             fire_btn.addEventListener('click', shoot)
+//             let x_dir = 1
+//             let y_dir = 1
+//
+//             const draw_ammo = () => {
+//                 ctx.fillStyle = 'black'
+//                 for (const bullet of ammo) {
+//                     bullet.x += 20
+//                     ctx.fillRect(bullet.x, bullet.y, 5, 5)
+//                 }
+//             }
+//
+//             const gen_creep = () => {
+//                 const offset = 100
+//                 const x = Math.random() * (cvs.width - offset) + offset - 5
+//                 const y = Math.random() * cvs.height - 5
+//                 creeps.push({ x, y })
+//             }
+//
+//             const draw_creeps = () => {
+//                 ctx.fillStyle = 'green'
+//                 for (const creep of creeps) {
+//                     ctx.fillRect(creep.x, creep.y, 10, 10)
+//                     console.log('creep')
+//                 }
+//             }
+//
+//             const draw = () => {
+//                 draw_ammo()
+//                 draw_player()
+//                 draw_creeps()
+//
+//                 for (const creep of creeps) {
+//                     if (creep.x <= player.x + player.size / 2 && creep.x >= player.x - player.size / 2 && creep.y <= player.y + player.size / 2 && creep.y >= player.y - player.size / 2)
+//                         lose_disp.style.display = 'block'
+//                     creep.x += 5
+//                     creep.y += (player.y - creep.y) / Math.absolute(player.y - creep.y) * 5
+//                 }
+//
+//                 const temp = []
+//                 while (ammo.length) {
+//                     const bullet = ammo.shift()
+//                     if (ammo[b].x <= creep[i].x + 5 && ammo[b].x >= creep[i].x - 5 && ammo[b].y <= creep[i].y + 5 && ammo[b].y >= creep[i].y - 5) {
+//                             creeps.splice(i, 1)
+//                             ammo.splice()
+//                         }
+//                 }
+//
+//                 if (Date.now() - timein % 100 === 0) gen_creep()
+//
+//                 fire_btn.style.left = Number(fire_btn.style.left) x_dir * 40
+//                 fire_btn.style.top += y_dir * 40
+//                 console.log(fire_btn.style.left, fire_btn.style.top)
+//
+//                 if (fire_btn.style.left > cvs.width || fire_btn.style.left < 0)
+//                     x_dir *= -1
+//                 if (fire_btn.style.top > cvs.height || fire_btn.style.top < 0)
+//                     y_dir *= -1
+//
+//                 requestAnimationFrame(draw)
+//             }
+//
+//             return draw
+//         }
+//
+//         run()()
+
+        window.onResize = () => {
+            cvs.width = cvs.clientWidth
+            cvs.height = cvs.clientHeight
+            ctx = cvs.getContext('2d')
+            run()
+        }
+    </script>
+</body>
+</html>
