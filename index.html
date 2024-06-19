@@ -134,12 +134,11 @@
                 }
 
                 ctx.fillRect(creep.x, creep.y, 10, 10)
-                creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
-                creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
+
             }
 
-            ctx.fillStyle = 'black'
             const stack = []
+            ctx.fillStyle = 'black'
             while (ammo.length) {
                 const bullet = ammo.pop()
                 if (bullet.x + 5 >= width)
@@ -149,12 +148,20 @@
                 ctx.moveTo(bullet.x, bullet.y)
                 ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2)
                 ctx.fill()
-
-                bullet.x += 15
-                stack.push(bullet)
             }
 
-            while (stack.length) ammo.push(stack.pop())
+            const map = {}
+            for (let i = 0; i < creeps.length; ++i) {
+                const creep = creeps[i]
+                creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
+                creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
+            }
+
+            while (stack.length) {
+                const bullet = stack.pop()
+                bullet.x += 15
+                ammo.push(bullet)
+            }
 
             btn.x += btn.x_speed * btn.dx
             btn.y += btn.y_speed * btn.dy
