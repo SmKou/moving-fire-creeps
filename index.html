@@ -51,7 +51,7 @@
 </head>
 <body>
     <canvas></canvas>
-    <span id="level-disp">Level <span id="level">1</span></span>
+    <!--<span id="level-disp">Level <span id="level">1</span></span>-->
     <span id="score">0</span>
     <span id="lose-disp" class="inactive">You lost!</span>
     <button id="fire-btn">Fire</button>
@@ -101,15 +101,15 @@
             ctx.fillStyle = 'white'
             ctx.fillRect(0, 0, width, height)
 
-            timein.count--
-            if (timein.count <= 0) {
-                timein.max_count--
-                timein.count = timein.max_count
-
-                if (creeps.length < timein.lim) {
-                    creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
-                }
-            }
+            // timein.count--
+            // if (timein.count <= 0) {
+            //     timein.max_count--
+            //     timein.count = timein.max_count
+            //
+            //     if (creeps.length < timein.lim) {
+            //         creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
+            //     }
+            // }
 
             ctx.fillStyle = 'black'
             ctx.font = '24px sans-serif'
@@ -139,8 +139,22 @@
             }
 
             ctx.fillStyle = 'black'
-            for (const bullet of ammo) {
+            const stack = []
+            while (ammo.length) {
+                const bullet = ammo.pop()
+                if (bullet.x + 5 >= width)
+                    continue;
+
+                ctx.beginPath()
+                ctx.moveTo(bullet.x, bullet.y)
+                ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2)
+                ctx.fill()
+
+                bullet.x += 15
+                stack.push(bullet)
             }
+
+            while (stack.length) ammo.push(stack.pop())
 
             btn.x += btn.x_speed * btn.dx
             btn.y += btn.y_speed * btn.dy
@@ -175,11 +189,15 @@
 
             fire_btn.style.left = btn.x + 'px'
             fire_btn.style.top = btn.y + 'px'
-            fire_btn.innerHTML = `${parseInt(btn.x + '')}, ${parseInt(btn.y + '')}`
 
             if (!win && !lose)
                 requestAnimationFrame(draw)
         }
+
+        document.getElementById('fire-btn').addEventListener('click', () => {
+            ammo.push({ x: player.x + player.x_size, y: player.y })
+            console.log(ammo)
+        })
 
         draw()
 
