@@ -101,22 +101,21 @@
             ctx.fillStyle = 'white'
             ctx.fillRect(0, 0, width, height)
 
-            // timein.count--
-            // if (timein.count <= 0) {
-            //     timein.max_count--
-            //     timein.count = timein.max_count
-            //
-            //     if (creeps.length < timein.lim) {
-            //         creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
-            //     }
-            // }
+            timein.count--
+            if (timein.count <= 0) {
+                timein.max_count--
+                timein.count = timein.max_count
+
+                if (creeps.length < timein.lim) {
+                    creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
+                }
+            }
 
             ctx.fillStyle = 'black'
             ctx.font = '24px sans-serif'
             ctx.textBaseline = 'middle'
             ctx.fillText('YOU', player.x + 5, player.y + 5)
 
-            ctx.strokeStyle = 'black'
             ctx.beginPath()
             ctx.moveTo(width / 2, 0)
             ctx.lineTo(player.x + player.x_size, player.y - player.y_size)
@@ -124,7 +123,10 @@
             ctx.lineTo(player.x, player.y + player.y_size)
             ctx.lineTo(player.x + player.x_size, player.y + player.y_size)
             ctx.lineTo(width / 2, height)
-            ctx.stroke()
+            ctx.lineTo(0, height)
+            ctx.lineTo(0, 0)
+            ctx.closePath()
+            ctx.fill()
 
             ctx.fillStyle = 'springgreen'
             for (const creep of creeps) {
@@ -134,23 +136,31 @@
                 }
 
                 ctx.fillRect(creep.x, creep.y, 10, 10)
-
             }
 
             const stack = []
-            ctx.fillStyle = 'black'
             while (ammo.length) {
                 const bullet = ammo.pop()
                 if (bullet.x + 5 >= width)
                     continue;
 
+                ctx.fillStyle = 'black'
                 ctx.beginPath()
                 ctx.moveTo(bullet.x, bullet.y)
-                ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2)
+                ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2)
+                ctx.closePath()
                 ctx.fill()
+
+                ctx.fillStyle = 'red'
+                ctx.beginPath()
+                ctx.moveTo(bullet.x, bullet.y)
+                ctx.arc(bullet.x, bullet.y, 1, 0, Math.PI * 2)
+                ctx.closePath()
+                ctx.fill()
+
+                stack.push(bullet)
             }
 
-            const map = {}
             for (let i = 0; i < creeps.length; ++i) {
                 const creep = creeps[i]
                 creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
@@ -163,46 +173,46 @@
                 ammo.push(bullet)
             }
 
-            btn.x += btn.x_speed * btn.dx
-            btn.y += btn.y_speed * btn.dy
-
-            if (btn.x >= x_offset) btn.x = x_offset
-            if (btn.x <= 0) btn.x = 0
-
-            if (btn.y >= y_offset) btn.y = y_offset
-            if (btn.y <= 0) btn.y = 0
-
-            if (btn.x >= x_offset || btn.x <= 0) {
-                btn.dx *= -1
-                btn.x_speed = Math.random() * 4 + 4
-            }
-
-            if (btn.y >= y_offset || btn.y <= 0) {
-                btn.dy *= -1
-                btn.y_speed = Math.random() * 4 + 4
-            }
-
-            if (btn.x < width / 2 + 100 && btn.x > width / 2 - 100 && btn.y < height / 2 + 100 && btn.y > height / 2 - 100) {
-                const r = Math.random()
-                if (r < .1) {
-                    btn.dx *= -1
-                    btn.dy *= -1
-                }
-                if (r > .4 && r < .5)
-                    btn.dx *= -1
-                if (r > .9)
-                    btn.dy *= -1
-            }
-
-            fire_btn.style.left = btn.x + 'px'
-            fire_btn.style.top = btn.y + 'px'
+            // btn.x += btn.x_speed * btn.dx
+            // btn.y += btn.y_speed * btn.dy
+            //
+            // if (btn.x >= x_offset) btn.x = x_offset
+            // if (btn.x <= 0) btn.x = 0
+            //
+            // if (btn.y >= y_offset) btn.y = y_offset
+            // if (btn.y <= 0) btn.y = 0
+            //
+            // if (btn.x >= x_offset || btn.x <= 0) {
+            //     btn.dx *= -1
+            //     btn.x_speed = Math.random() * 4 + 4
+            // }
+            //
+            // if (btn.y >= y_offset || btn.y <= 0) {
+            //     btn.dy *= -1
+            //     btn.y_speed = Math.random() * 4 + 4
+            // }
+            //
+            // if (btn.x < width / 2 + 100 && btn.x > width / 2 - 100 && btn.y < height / 2 + 100 && btn.y > height / 2 - 100) {
+            //     const r = Math.random()
+            //     if (r < .1) {
+            //         btn.dx *= -1
+            //         btn.dy *= -1
+            //     }
+            //     if (r > .4 && r < .5)
+            //         btn.dx *= -1
+            //     if (r > .9)
+            //         btn.dy *= -1
+            // }
+            //
+            // fire_btn.style.left = btn.x + 'px'
+            // fire_btn.style.top = btn.y + 'px'
 
             if (!win && !lose)
                 requestAnimationFrame(draw)
         }
 
         document.getElementById('fire-btn').addEventListener('click', () => {
-            ammo.push({ x: player.x + player.x_size, y: player.y })
+            ammo.push({ x: player.x + player.x_size + 10, y: player.y })
             console.log(ammo)
         })
 
