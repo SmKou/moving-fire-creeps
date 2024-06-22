@@ -94,6 +94,7 @@
             h: 40
         }
         const ammo = []
+        const bullet_y = player.y - 1
         const bullet_size = 2
         const creeps = []
         const creep_size = 10
@@ -166,12 +167,13 @@
             while(ammo.length) {
                 const bullet = ammo.pop()
                 const tens = Math.floor(bullet / 10)
+                console.log('bullet', bullet)
 
                 let del_bullet = false
                 if (collisions[tens] && !collisions[tens].length) {
                     console.log(collisions[tens][0], { x: bullet, y: player.y })
                     for (const idx of collisions[tens])
-                        if (in_bound({ x: bullet, y: player.y, size: bullet_size }, {...creeps[idx], size: creep_size })) {
+                        if (in_bound({ x: bullet, y: bullet_y, size: bullet_size }, {...creeps[idx], size: creep_size })) {
                             del_bullet = true
                             creeps.splice(idx, 1)
                             const i = collisions[tens].indexOf(idx)
@@ -194,8 +196,8 @@
             ctx.fillStyle = 'black'
             for (const bullet of stack) {
                 ctx.beginPath()
-                ctx.moveTo(bullet, player.y)
-                ctx.arc(bullet, player.y, bullet_size, 0, Math.PI * 2)
+                ctx.moveTo(bullet, bullet_y)
+                ctx.arc(bullet, bullet_y, bullet_size, 0, Math.PI * 2)
                 ctx.closePath()
                 ctx.fill()
 
