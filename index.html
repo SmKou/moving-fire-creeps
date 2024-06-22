@@ -87,10 +87,17 @@
         const x_offset = width - fire_btn.clientWidth
         const y_offset = height - fire_btn.clientHeight
 
-        const player = { x: 30, y: cvs.height / 2 - 5, x_size: 50, y_size: 40 }
+        const player = {
+            x: 30,
+            y: cvs.height / 2 - 5,
+            w: 50,
+            h: 40
+        }
         const ammo = []
+        const bullet_size = 2
         const creeps = []
         const creep_size = 10
+        const creep_speed = 1
 
         const timein = {
             lim: 20,
@@ -98,7 +105,13 @@
             count: 60
         }
 
-        const dist = ({ x: cx, y: cy }, { x: px, y: py }) => Math.sqrt((cx - px) ** 2 + (cy - py) ** 2)
+        // easier to troubleshoot
+        const in_bound = (incoming, target) => {
+            return incoming.x >= target.x
+            && (incoming.x <= target.x + target.size || incoming.x <= target.x + target.w)
+            && incoming.y >= target.y
+            && (incoming.y <= target.y + target.size || incoming.y <= target.y + target.h)
+        }
 
         const draw = () => {
             ctx.fillStyle = 'white'
@@ -124,73 +137,80 @@
 
             ctx.beginPath()
             ctx.moveTo(width / 2, 0)
-            ctx.lineTo(player.x + player.x_size, player.y - player.y_size)
-            ctx.lineTo(player.x, player.y - player.y_size)
-            ctx.lineTo(player.x, player.y + player.y_size)
-            ctx.lineTo(player.x + player.x_size, player.y + player.y_size)
+            ctx.lineTo(player.x + player.w, player.y - player.h)
+            ctx.lineTo(player.x, player.y - player.h)
+            ctx.lineTo(player.x, player.y + player.h)
+            ctx.lineTo(player.x + player.w, player.y + player.h)
             ctx.lineTo(width / 2, height)
             ctx.lineTo(0, height)
             ctx.lineTo(0, 0)
             ctx.closePath()
             ctx.fill()
 
-            ctx.fillStyle = 'springgreen'
-            for (const creep of creeps) {
-                if (creep.x <= player.x + player.x_size && creep.x >= player.x && creep.y <= player.y + player.y_size && creep.y >= player.y) {
+            const collisions = {}
+            for (let i = 0; i < creeps.length; ++i) {
+                if (in_bound({ ...creeps[i], size: creep_size }, player)) {
                     lose = true
                     lose_disp.style.display = 'block'
+                    return;
                 }
 
-                ctx.fillRect(creep.x, creep.y, creep_size, creep_size)
-            }
-
-            const collisions = {}
-            for (const creep of creeps) {
-                if (dist(creep, player) )
-
-                const tens = Math.floor(creep.x / 10)
+                const tens = Math.floor(creeps[i].x / 10)
                 if (!collisions[tens])
                     collisions[tens] = []
-                collisions[tens].push(creep)
+                collisions[tens].push(i)
             }
+            console.log(collisions)
 
             const stack = []
-            for (const bullet of ammo)
-
-
-            while (ammo.length) {
+            while(ammo.length) {
                 const bullet = ammo.pop()
-                if (bullet.x + 5 >= width)
+                const tens = Math.floor(bullet / 10)
+
+                let del_bullet = false
+                if (collisions[tens] && !collisions[tens].length) {
+                    console.log(collisions[tens][0], { x: bullet, y: player.y })
+                    for (const idx of collisions[tens])
+                        if (in_bound({ x: bullet, y: player.y, size: bullet_size }, {...creeps[idx], size: creep_size })) {
+                            del_bullet = true
+                            creeps.splice(idx, 1)
+                            const i = collisions[tens].indexOf(idx)
+                            collisions[tens].splice(i, 1)
+                            console.log('collision detected')
+                            continue;
+                        }
+                }
+                if (del_bullet)
                     continue;
-
-                ctx.fillStyle = 'black'
-                ctx.beginPath()
-                ctx.moveTo(bullet.x, bullet.y)
-                ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2)
-                ctx.closePath()
-                ctx.fill()
-
-                ctx.fillStyle = 'red'
-                ctx.beginPath()
-                ctx.moveTo(bullet.x, bullet.y)
-                ctx.arc(bullet.x, bullet.y, 1, 0, Math.PI * 2)
-                ctx.closePath()
-                ctx.fill()
-
+                if (bullet + bullet_size >= width)
+                    continue;
                 stack.push(bullet)
+            }
+
+            ctx.fillStyle = 'springgreen'
+            for (const creep of creeps)
+                ctx.fillRect(creep.x, creep.y, creep_size, creep_size)
+
+            ctx.fillStyle = 'black'
+            for (const bullet of stack) {
+                ctx.beginPath()
+                ctx.moveTo(bullet, player.y)
+                ctx.arc(bullet, player.y, bullet_size, 0, Math.PI * 2)
+                ctx.closePath()
+                ctx.fill()
+
+                console.log('bullet', bullet, player.y)
             }
 
             for (let i = 0; i < creeps.length; ++i) {
                 const creep = creeps[i]
-                creep.x += 5 * (player.x - creep.x) / Math.abs(player.x - creep.x)
-                creep.y += 5 * (player.y - creep.y) / Math.abs(player.y - creep.y)
+                console.log('creep', creep.x, creep.y)
+                creep.x += creep_speed * (player.x - creep.x) / Math.abs(player.x - creep.x)
+                creep.y += creep_speed * (player.y - creep.y) / Math.abs(player.y - creep.y)
             }
 
-            while (stack.length) {
-                const bullet = stack.pop()
-                bullet.x += 15
-                ammo.push(bullet)
-            }
+            while (stack.length)
+                ammo.push(stack.pop() + 10)
 
             // btn.x += btn.x_speed * btn.dx
             // btn.y += btn.y_speed * btn.dy
@@ -231,8 +251,7 @@
         }
 
         document.getElementById('fire-btn').addEventListener('click', () => {
-            ammo.push({ x: player.x + player.x_size + 10, y: player.y })
-            console.log(ammo)
+            ammo.push(player.x + player.w + 10)
         })
 
         draw()
