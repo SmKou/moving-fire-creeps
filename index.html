@@ -90,12 +90,15 @@
         const player = { x: 30, y: cvs.height / 2 - 5, x_size: 50, y_size: 40 }
         const ammo = []
         const creeps = []
+        const creep_size = 10
 
         const timein = {
             lim: 20,
             max_count: 60,
             count: 60
         }
+
+        const dist = ({ x: cx, y: cy }, { x: px, y: py }) => Math.sqrt((cx - px) ** 2 + (cy - py) ** 2)
 
         const draw = () => {
             ctx.fillStyle = 'white'
@@ -107,7 +110,10 @@
                 timein.count = timein.max_count
 
                 if (creeps.length < timein.lim) {
-                    creeps.push({ x: Math.random() * (width / 2) + width / 2, y: Math.random() * height })
+                    creeps.push({
+                        x: Math.random() * (width / 2) + width / 2,
+                        y: Math.random() * height
+                    })
                 }
             }
 
@@ -135,10 +141,23 @@
                     lose_disp.style.display = 'block'
                 }
 
-                ctx.fillRect(creep.x, creep.y, 10, 10)
+                ctx.fillRect(creep.x, creep.y, creep_size, creep_size)
+            }
+
+            const collisions = {}
+            for (const creep of creeps) {
+                if (dist(creep, player) )
+
+                const tens = Math.floor(creep.x / 10)
+                if (!collisions[tens])
+                    collisions[tens] = []
+                collisions[tens].push(creep)
             }
 
             const stack = []
+            for (const bullet of ammo)
+
+
             while (ammo.length) {
                 const bullet = ammo.pop()
                 if (bullet.x + 5 >= width)
